@@ -9,7 +9,16 @@ import {
     signOut,
     onAuthStateChanged,
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    collection,
+    writeBatch,
+    query,
+    getDocs,
+} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -38,7 +47,7 @@ export const db = getFirestore();
 // 是因为传过来的userAuh是signUp-form ->
 // const { user } = await createAuthUserWithEmailAndPassword(email, password); 的 user (该API的返回值或者任何其他方式登录的返回值大致都长一样)
 // 返回值里的displayName为null 因为google并没返回表单输入的displayName
-// 所以 需要将表单存储的displayName传到createUserDocumentFromAuth() 然后解构
+// 所以 需要将表单存储的displayName传到createUserDocumentFromAuth() 然后...解构
 export const createUserDocumentFromAuth = async (userAuth, additionalInformation = {}) => {
     if (!userAuth) return;
     const userDocRef = doc(db, "users", userAuth.uid);
@@ -79,3 +88,29 @@ export const signInAuthUserWithEmailAndPassword = async (email, password) => {
 export const signOutUser = async () => await signOut(auth);
 
 export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth, callback);
+
+// 传入 数据库想的collection名, json格式的数据 -> "categories", SHOP_DATA
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+    const collectionRef = collection(db, collectionKey);
+    const batch = writeBatch(db);
+
+    objectsToAdd.forEach((object) => {
+        const docRef = doc(collectionRef, object.title.toLowerCase());
+        batch.set(docRef, object);
+    });
+
+    await batch.commit();
+};
+
+export const getCategoriesAndDocuments = async () => {
+    const collectionRef = collection(db, "categories");
+    const q = query(collectionRef);
+
+    const querySnapshot = await getDocs(q);
+    const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+        const { title, items } = docSnapshot.data();
+        acc[title.toLowerCase()] = items;
+        return acc;
+    }, {});
+    return categoryMap;
+};
