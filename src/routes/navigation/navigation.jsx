@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Outlet, Link } from "react-router-dom";
 
 import { UserContext } from "../../contexts/user.context";
@@ -11,13 +11,13 @@ import { signOutUser } from "../../utils/firebase.js";
 
 import { CartContext } from "../../contexts/cart.context";
 
-// import "./navigation.scss";
-import {
-    NavigationContainer,
-    LogoContainer,
-    NavLinksContainer,
-    NavLink,
-} from "./navigation.styles";
+import "./navigation.scss";
+// import {
+//     NavigationContainer,
+//     LogoContainer,
+//     NavLinksContainer,
+//     NavLink,
+// } from "./navigation.styles";
 
 const Navigation = () => {
     const { currentUser } = useContext(UserContext);
@@ -28,7 +28,7 @@ const Navigation = () => {
     };
     return (
         <>
-            <NavigationContainer>
+            {/* <NavigationContainer>
                 <LogoContainer to={"/"}>
                     <CrwnLogo />
                 </LogoContainer>
@@ -45,7 +45,29 @@ const Navigation = () => {
                     <CartIcon />
                 </NavLinksContainer>
                 {isCartOpen && <CartDropdown />}
-            </NavigationContainer>
+            </NavigationContainer> */}
+            <div className="navigation">
+                <Link className="logo-container" to="/">
+                    <CrwnLogo className="logo" />
+                </Link>
+                <div className="nav-links-container">
+                    <Link className="nav-link" to="/shop">
+                        SHOP
+                    </Link>
+
+                    {currentUser ? (
+                        <span className="nav-link" onClick={signOutHandler}>
+                            SIGN OUT
+                        </span>
+                    ) : (
+                        <Link className="nav-link" to="/auth">
+                            SIGN IN
+                        </Link>
+                    )}
+                    <CartIcon />
+                </div>
+                {isCartOpen && <CartDropdown />}
+            </div>
             <Outlet />
         </>
     );
